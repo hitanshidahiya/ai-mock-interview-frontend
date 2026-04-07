@@ -13,7 +13,7 @@ const Register = ({ setAuth }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = `${import.meta.env.VITE_API_URL}/api/auth/register`;
+      const url = `${import.meta.env.VITE_API_URL}/auth/register`;
       console.log("REGISTER URL:", url);
 
       const res = await axios.post(url, form, { withCredentials: true });
