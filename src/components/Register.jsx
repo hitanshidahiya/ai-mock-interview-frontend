@@ -13,7 +13,7 @@ const Register = ({ setAuth }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, form, { withCredentials: true });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, form, { withCredentials: true });
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setAuth(true); navigate("/dashboard");
