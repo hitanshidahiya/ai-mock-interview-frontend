@@ -26,26 +26,40 @@ const Gauge = ({ value, max, label, color }) => {
 const CalendarHeatmap = ({ activity, streak }) => {
   const actMap = {};
   activity.forEach(a => {
-  const date = new Date(a.date).toLocaleDateString("en-CA");
-  actMap[date] = a.count;
-});
+    const date = new Date(a.date).toLocaleDateString("en-CA");
+    actMap[date] = a.count;
+  });
 
-  const today = new Date(); 
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
   const days = Array.from({ length: 365 }, (_, i) => {
     const d = new Date(today);
     d.setDate(d.getDate() - (364 - i));
-   const key = d.toLocaleDateString("en-CA");
+    const key = d.toLocaleDateString("en-CA");
     const dow = d.getDay();
-    return { key, 
-      count: actMap[key] || 0, 
-      date: d, 
-      dayName: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow] };
+    return {
+      key,
+      count: actMap[key] || 0,
+      date: d,
+      dayName: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow]
+    };
   });
 
   const weeks = [];
-  for (let w = 0; w < 53; w++) weeks.push(days.slice(w * 7, w * 7 + 7));
+  for (let w = 0; w < 53; w++) {
+    const week = days.slice(w * 7, w * 7 + 7);
 
+    const prevWeek = days.slice((w - 1) * 7, (w - 1) * 7 + 7);
+
+    const isNewMonth =
+      w === 0 ||
+      week[0].date.getMonth() !== prevWeek[0]?.date.getMonth();
+
+    weeks.push({
+      days: week,
+      isNewMonth
+    });
+  }
   const cellColor = (n) => {
     if (n === 0) return "hcell-0";
     if (n === 1) return "hcell-1";
@@ -76,7 +90,13 @@ const CalendarHeatmap = ({ activity, streak }) => {
             ))}
           </div>
           {weeks.map((week, wi) => (
-            <div key={wi} className="heatmap-week-col">
+            <div
+              key={wi}
+              className="heatmap-week-col"
+              style={{
+                marginLeft: week.isNewMonth ? "8px" : "2px"
+              }}
+            >
               {week.map((day) => (
                 <Tooltip key={day.key} title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}>
                   <div className={`hcell ${cellColor(day.count)}`} />
