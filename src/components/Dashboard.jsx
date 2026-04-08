@@ -33,7 +33,7 @@ const CalendarHeatmap = ({ activity, streak }) => {
     d.setDate(d.getDate() - (69 - i));
     const key = d.toISOString().split("T")[0];
     const dow = d.getDay();
-    return { key, count: actMap[key] || 0, date: d, dayName: ["Su","Mo","Tu","We","Th","Fr","Sa"][dow] };
+    return { key, count: actMap[key] || 0, date: d, dayName: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow] };
   });
 
   const weeks = [];
@@ -64,7 +64,7 @@ const CalendarHeatmap = ({ activity, streak }) => {
       <div className="heatmap-scroll">
         <div className="heatmap-body">
           <div className="heatmap-day-labels">
-            {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d, i) => (
+            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d, i) => (
               <div key={d} className="heatmap-day-label" style={{ color: i % 2 === 0 ? "var(--muted)" : "transparent" }}>{d}</div>
             ))}
           </div>
@@ -81,7 +81,7 @@ const CalendarHeatmap = ({ activity, streak }) => {
       </div>
       <div className="heatmap-legend">
         <span>Less</span>
-        {["hcell-0","hcell-1","hcell-2","hcell-3"].map(c => <div key={c} className={`hcell ${c}`} style={{ cursor: "default" }} />)}
+        {["hcell-0", "hcell-1", "hcell-2", "hcell-3"].map(c => <div key={c} className={`hcell ${c}`} style={{ cursor: "default" }} />)}
         <span>More</span>
         <span className="heatmap-legend-streak">{streak} day streak 🔥</span>
       </div>
@@ -173,11 +173,11 @@ const Dashboard = ({ setAuth }) => {
   );
 
   const radarData = [
-    { skill: "Accuracy",    value: Math.min(100, Math.round(((data?.averageScore || 0) / 50) * 100)) },
+    { skill: "Accuracy", value: Math.min(100, Math.round(((data?.averageScore || 0) / 50) * 100)) },
     { skill: "Consistency", value: Math.min(100, (data?.completed || 0) * 20) },
-    { skill: "Breadth",     value: Math.min(100, Object.keys(data?.roleStats || {}).length * 25) },
-    { skill: "Streak",      value: Math.min(100, (streak?.streak || 0) * 15) },
-    { skill: "Growth",      value: Math.min(100, (data?.scoreTrend?.length || 0) > 1 ? 65 : 30) },
+    { skill: "Breadth", value: Math.min(100, Object.keys(data?.roleStats || {}).length * 25) },
+    { skill: "Streak", value: Math.min(100, (streak?.streak || 0) * 15) },
+    { skill: "Growth", value: Math.min(100, (data?.scoreTrend?.length || 0) > 1 ? 65 : 30) },
   ];
   const trendData = (data?.scoreTrend || []).map((s, i) => ({ n: `#${i + 1}`, score: s.score }));
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -239,11 +239,11 @@ const Dashboard = ({ setAuth }) => {
         {/* ── STAT CARDS ── */}
         <div className="db-stat-grid">
           {[
-            { label: "Interviews", val: data?.totalInterviews || 0, icon: "📝"        },
-            { label: "Best Score",  val: data?.bestScore || 0,       icon: "🏆"   },
-            { label: "Avg Score",   val: data?.averageScore || 0,    icon: "📊"       },
-            { label: "Day Streak",  val: `${streak?.streak || 0}🔥`, icon: "🔥"         },
-            { label: "Completed",   val: data?.completed || 0,       icon: "✅"        },
+            { label: "Interviews", val: data?.totalInterviews || 0, icon: "📝", grad: "var(--grad)" },
+            { label: "Best Score", val: data?.bestScore || 0, icon: "🏆", grad: "linear-gradient(135deg,#a855f7,#ec4899)" },
+            { label: "Avg Score", val: data?.averageScore || 0, icon: "📊", grad: "var(--grad2)" },
+            { label: "Day Streak", val: `${streak?.streak || 0}🔥`, icon: "🔥", grad: "var(--grad-warm)" },
+            { label: "Completed", val: data?.completed || 0, icon: "✅", grad: "var(--grad-green)" },
           ].map(s => (
             <div key={s.label} className="card db-stat-card">
               <div className="db-stat-icon">{s.icon}</div>
@@ -269,8 +269,8 @@ const Dashboard = ({ setAuth }) => {
           <div className="card card-p">
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>🎯 Performance</div>
             <div className="db-gauge-grid">
-              <Gauge value={data?.averageScore || 0} max={50} label="Avg"  color="#6366f1" />
-              <Gauge value={data?.bestScore || 0}    max={50} label="Best" color="#06b6d4" />
+              <Gauge value={data?.averageScore || 0} max={50} label="Avg" color="#6366f1" />
+              <Gauge value={data?.bestScore || 0} max={50} label="Best" color="#06b6d4" />
             </div>
           </div>
 
