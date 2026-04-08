@@ -247,7 +247,7 @@ const Dashboard = ({ setAuth }) => {
           ].map(s => (
             <div key={s.label} className="card db-stat-card">
               <div className="db-stat-icon">{s.icon}</div>
-              <div className="db-stat-val" style={{ background: s.grad }}>{s.val}</div>
+              <div className="db-stat-val" >{s.val}</div>
               <div className="db-stat-label">{s.label}</div>
             </div>
           ))}
