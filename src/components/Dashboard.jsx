@@ -245,7 +245,7 @@ const Dashboard = ({ setAuth }) => {
             { label: "Day Streak",  val: `${streak?.streak || 0}🔥`, icon: "🔥", grad: "var(--grad-warm)" },
             { label: "Completed",   val: data?.completed || 0,       icon: "✅", grad: "var(--grad-green)" },
           ].map(s => (
-            <div key={s.label} >
+            <div key={s.label} className="card db-stat-card">
               <div className="db-stat-icon">{s.icon}</div>
               <div className="db-stat-val" style={{ background: s.grad }}>{s.val}</div>
               <div className="db-stat-label">{s.label}</div>
