@@ -45,29 +45,21 @@ const CalendarHeatmap = ({ activity, streak }) => {
     };
   });
 
-  const weeks = [];
-
-  for (let w = 0; w < 53; w++) {
+  const weeks = Array.from({ length: 53 }, (_, w) => {
     const week = days.slice(w * 7, w * 7 + 7);
 
-    let isNewMonth = false;
+    const prevWeek =
+      w > 0 ? days.slice((w - 1) * 7, (w - 1) * 7 + 7) : null;
 
-    if (w === 0) {
-      isNewMonth = true;
-    } else {
-      const prevWeek = days.slice((w - 1) * 7, (w - 1) * 7 + 7);
+    const isNewMonth =
+      w === 0 ||
+      (prevWeek &&
+        week[0] &&
+        prevWeek[0] &&
+        week[0].date.getMonth() !== prevWeek[0].date.getMonth());
 
-      if (prevWeek.length > 0 && week.length > 0) {
-        isNewMonth =
-          week[0].date.getMonth() !== prevWeek[0].date.getMonth();
-      }
-    }
-
-    weeks.push({
-      days: week,
-      isNewMonth
-    });
-  }
+    return { days: week, isNewMonth };
+  });
   const cellColor = (n) => {
     if (n === 0) return "hcell-0";
     if (n === 1) return "hcell-1";
@@ -83,42 +75,113 @@ const CalendarHeatmap = ({ activity, streak }) => {
       : "";
   });
 
+  // return (
+  //   <div>
+  //     <div className="heatmap-month-row">
+  //       {weeks.map((_, wi) => (
+  //         <div key={wi} className="heatmap-month-label">{monthLabels[wi]}</div>
+  //       ))}
+  //     </div>
+  //     <div className="heatmap-scroll">
+  //       <div className="heatmap-body">
+  //         <div className="heatmap-day-labels">
+  //           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d, i) => (
+  //             <div key={d} className="heatmap-day-label" style={{ color: i % 2 === 0 ? "var(--muted)" : "transparent" }}>{d}</div>
+  //           ))}
+  //         </div>
+  //         {weeks.map((week, wi) => (
+  //           <div
+  //             key={wi}
+  //             className="heatmap-week-col"
+  //             style={{
+  //               marginLeft: week.isNewMonth ? "8px" : "2px"
+  //             }}
+  //           >
+  //             {week.map((day) => (
+  //               <Tooltip key={day.key} title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}>
+  //                 <div className={`hcell ${cellColor(day.count)}`} />
+  //               </Tooltip>
+  //             ))}
+  //           </div>
+  //         ))}
+  //       </div>
+  //     </div>
+  //     <div className="heatmap-legend">
+  //       <span>Less</span>
+  //       {["hcell-0", "hcell-1", "hcell-2", "hcell-3"].map(c => <div key={c} className={`hcell ${c}`} style={{ cursor: "default" }} />)}
+  //       <span>More</span>
+  //       <span className="heatmap-legend-streak">{streak} day streak 🔥</span>
+  //     </div>
+  //   </div>
+  // );
   return (
     <div>
+      {/* Month Labels */}
       <div className="heatmap-month-row">
-        {weeks.map((_, wi) => (
-          <div key={wi} className="heatmap-month-label">{monthLabels[wi]}</div>
+        {weeks.map((week, wi) => (
+          <div key={wi} className="heatmap-month-label">
+            {week.isNewMonth
+              ? week.days[0]?.date.toLocaleString("default", {
+                  month: "short"
+                })
+              : ""}
+          </div>
         ))}
       </div>
+
+      {/* Heatmap */}
       <div className="heatmap-scroll">
         <div className="heatmap-body">
+          {/* Day labels */}
           <div className="heatmap-day-labels">
             {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d, i) => (
-              <div key={d} className="heatmap-day-label" style={{ color: i % 2 === 0 ? "var(--muted)" : "transparent" }}>{d}</div>
+              <div
+                key={d}
+                className="heatmap-day-label"
+                style={{
+                  color: i % 2 === 0 ? "var(--muted)" : "transparent"
+                }}
+              >
+                {d}
+              </div>
             ))}
           </div>
+
+          {/* Weeks */}
           {weeks.map((week, wi) => (
-            <div
-              key={wi}
-              className="heatmap-week-col"
-              style={{
-                marginLeft: week.isNewMonth ? "8px" : "2px"
-              }}
-            >
-              {week.map((day) => (
-                <Tooltip key={day.key} title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}>
-                  <div className={`hcell ${cellColor(day.count)}`} />
-                </Tooltip>
-              ))}
-            </div>
+            <React.Fragment key={wi}>
+              {/* ✅ Month gap (safe, no UI break) */}
+              {week.isNewMonth && wi !== 0 && (
+                <div style={{ width: "8px" }} />
+              )}
+
+              <div className="heatmap-week-col">
+                {week.days.map((day) => (
+                  <Tooltip
+                    key={day.key}
+                    title={`${day.key}: ${day.count} interview${
+                      day.count !== 1 ? "s" : ""
+                    }`}
+                  >
+                    <div className={`hcell ${cellColor(day.count)}`} />
+                  </Tooltip>
+                ))}
+              </div>
+            </React.Fragment>
           ))}
         </div>
       </div>
+
+      {/* Legend */}
       <div className="heatmap-legend">
         <span>Less</span>
-        {["hcell-0", "hcell-1", "hcell-2", "hcell-3"].map(c => <div key={c} className={`hcell ${c}`} style={{ cursor: "default" }} />)}
+        {["hcell-0", "hcell-1", "hcell-2", "hcell-3"].map((c) => (
+          <div key={c} className={`hcell ${c}`} />
+        ))}
         <span>More</span>
-        <span className="heatmap-legend-streak">{streak} day streak 🔥</span>
+        <span className="heatmap-legend-streak">
+          {streak} day streak 🔥
+        </span>
       </div>
     </div>
   );

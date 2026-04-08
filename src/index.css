@@ -1078,7 +1078,8 @@ html.dark .mesh-bg {
 }
 .heatmap-body {
   display: flex;
-  gap: 4px;
+  align-items: flex-start;
+  overflow-x: auto;
 }
 .heatmap-day-labels {
   display: flex;
@@ -1113,6 +1114,18 @@ html.dark .mesh-bg {
   font-weight: 700;
   color: #f97316;
 }
+
+.hcell {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* colors */
+.hcell-0 { background: #e5e7eb; }
+.hcell-1 { background: #c7d2fe; }
+.hcell-2 { background: #818cf8; }
+.hcell-3 { background: #4f46e5; }
 
 /* ══════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
