@@ -25,19 +25,26 @@ const Gauge = ({ value, max, label, color }) => {
 /* ── Calendar heatmap ── */
 const CalendarHeatmap = ({ activity, streak }) => {
   const actMap = {};
-  activity.forEach(a => { actMap[a.date] = a.count; });
+  activity.forEach(a => {
+  const date = new Date(a.date).toLocaleDateString("en-CA");
+  actMap[date] = a.count;
+});
 
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const days = Array.from({ length: 70 }, (_, i) => {
+  const today = new Date(); 
+  today.setHours(0, 0, 0, 0);
+  const days = Array.from({ length: 365 }, (_, i) => {
     const d = new Date(today);
-    d.setDate(d.getDate() - (69 - i));
-    const key = d.toISOString().split("T")[0];
-    const dow = d.getDay();
-    return { key, count: actMap[key] || 0, date: d, dayName: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow] };
+    d.setDate(d.getDate() - (364 - i));
+   const key = d.toLocaleDateString("en-CA");
+    // const dow = d.getDay();
+    return { key, 
+      count: actMap[key] || 0, 
+      date: d, 
+      dayName: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow] };
   });
 
   const weeks = [];
-  for (let w = 0; w < 10; w++) weeks.push(days.slice(w * 7, w * 7 + 7));
+  for (let w = 0; w < 53; w++) weeks.push(days.slice(w * 7, w * 7 + 7));
 
   const cellColor = (n) => {
     if (n === 0) return "hcell-0";
