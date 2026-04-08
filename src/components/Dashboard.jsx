@@ -46,14 +46,22 @@ const CalendarHeatmap = ({ activity, streak }) => {
   });
 
   const weeks = [];
+
   for (let w = 0; w < 53; w++) {
     const week = days.slice(w * 7, w * 7 + 7);
 
-    const prevWeek = days.slice((w - 1) * 7, (w - 1) * 7 + 7);
+    let isNewMonth = false;
 
-    const isNewMonth =
-      w === 0 ||
-      week[0].date.getMonth() !== prevWeek[0]?.date.getMonth();
+    if (w === 0) {
+      isNewMonth = true;
+    } else {
+      const prevWeek = days.slice((w - 1) * 7, (w - 1) * 7 + 7);
+
+      if (prevWeek.length > 0 && week.length > 0) {
+        isNewMonth =
+          week[0].date.getMonth() !== prevWeek[0].date.getMonth();
+      }
+    }
 
     weeks.push({
       days: week,
