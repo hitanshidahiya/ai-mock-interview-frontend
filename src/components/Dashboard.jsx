@@ -36,7 +36,7 @@ const CalendarHeatmap = ({ activity, streak }) => {
     const d = new Date(today);
     d.setDate(d.getDate() - (364 - i));
    const key = d.toLocaleDateString("en-CA");
-    // const dow = d.getDay();
+    const dow = d.getDay();
     return { key, 
       count: actMap[key] || 0, 
       date: d, 
