@@ -4,7 +4,7 @@ import { message, Tooltip, Modal } from "antd";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, Bar, BarChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RTooltip, Cell } from "recharts";
 import axios from "axios";
 
-/* ── Circular Gauge ─────────────────────────── */
+/* ── Circular Gauge ── */
 const Gauge = ({ value, max, label, color }) => {
   const pct = Math.min(100, Math.round((value / max) * 100));
   const r = 44; const circ = 2 * Math.PI * r;
@@ -22,23 +22,20 @@ const Gauge = ({ value, max, label, color }) => {
   );
 };
 
-/* ── Calendar heatmap ───────────────────────── */
+/* ── Calendar heatmap ── */
 const CalendarHeatmap = ({ activity, streak }) => {
   const actMap = {};
   activity.forEach(a => { actMap[a.date] = a.count; });
 
-  // Build 10 weeks × 7 days = 70 cells, arranged as columns (weeks) × rows (days)
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const days = Array.from({ length: 70 }, (_, i) => {
     const d = new Date(today);
     d.setDate(d.getDate() - (69 - i));
     const key = d.toISOString().split("T")[0];
-    const dow = d.getDay(); // 0=Sun
-    const dayName = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow];
-    return { key, count: actMap[key] || 0, date: d, dayName };
+    const dow = d.getDay();
+    return { key, count: actMap[key] || 0, date: d, dayName: ["Su","Mo","Tu","We","Th","Fr","Sa"][dow] };
   });
 
-  // Group into weeks (columns)
   const weeks = [];
   for (let w = 0; w < 10; w++) weeks.push(days.slice(w * 7, w * 7 + 7));
 
@@ -52,51 +49,47 @@ const CalendarHeatmap = ({ activity, streak }) => {
   const monthLabels = [];
   weeks.forEach((week, wi) => {
     const first = week[0].date;
-    if (first.getDate() <= 7 || wi === 0) {
-      monthLabels[wi] = first.toLocaleString("default", { month: "short" });
-    } else {
-      monthLabels[wi] = "";
-    }
+    monthLabels[wi] = (first.getDate() <= 7 || wi === 0)
+      ? first.toLocaleString("default", { month: "short" })
+      : "";
   });
 
   return (
     <div>
-      {/* Month labels */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 4, paddingLeft: 22 }}>
+      <div className="heatmap-month-row">
         {weeks.map((_, wi) => (
-          <div key={wi} style={{ width: 14, fontSize: 9, color: "var(--muted)", textAlign: "center", flexShrink: 0 }}>{monthLabels[wi]}</div>
+          <div key={wi} className="heatmap-month-label">{monthLabels[wi]}</div>
         ))}
       </div>
-      <div style={{ display: "flex", gap: 4 }}>
-        {/* Day labels */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 4, marginRight: 4 }}>
-          {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d, i) => (
-            <div key={d} style={{ width: 14, height: 14, fontSize: 9, color: i % 2 === 0 ? "var(--muted)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{d}</div>
-          ))}
-        </div>
-        {/* Cells */}
-        {weeks.map((week, wi) => (
-          <div key={wi} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {week.map((day) => (
-              <Tooltip key={day.key} title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}>
-                <div className={`hcell ${cellColor(day.count)}`} />
-              </Tooltip>
+      <div className="heatmap-scroll">
+        <div className="heatmap-body">
+          <div className="heatmap-day-labels">
+            {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d, i) => (
+              <div key={d} className="heatmap-day-label" style={{ color: i % 2 === 0 ? "var(--muted)" : "transparent" }}>{d}</div>
             ))}
           </div>
-        ))}
+          {weeks.map((week, wi) => (
+            <div key={wi} className="heatmap-week-col">
+              {week.map((day) => (
+                <Tooltip key={day.key} title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}>
+                  <div className={`hcell ${cellColor(day.count)}`} />
+                </Tooltip>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
-      {/* Legend */}
-      <div style={{ display: "flex", gap: 5, alignItems: "center", marginTop: 10, fontSize: 11, color: "var(--muted)" }}>
+      <div className="heatmap-legend">
         <span>Less</span>
-        {["hcell-0", "hcell-1", "hcell-2", "hcell-3"].map(c => <div key={c} className={`hcell ${c}`} style={{ cursor: "default" }} />)}
+        {["hcell-0","hcell-1","hcell-2","hcell-3"].map(c => <div key={c} className={`hcell ${c}`} style={{ cursor: "default" }} />)}
         <span>More</span>
-        <span style={{ marginLeft: "auto", fontWeight: 700, color: "#f97316" }}>{streak} day streak 🔥</span>
+        <span className="heatmap-legend-streak">{streak} day streak 🔥</span>
       </div>
     </div>
   );
 };
 
-/* ── Scores ─────────────────────────────────── */
+/* ── Scores ── */
 const scoreColor = s => s >= 8 ? "#10b981" : s >= 5 ? "#f59e0b" : "#ef4444";
 
 const Dashboard = ({ setAuth }) => {
@@ -131,7 +124,6 @@ const Dashboard = ({ setAuth }) => {
     load();
   }, [navigate, setAuth]);
 
-  // Re-fetch streak + activity after returning from interview (heatmap update)
   useEffect(() => {
     const handleFocus = async () => {
       const token = localStorage.getItem("token");
@@ -153,7 +145,8 @@ const Dashboard = ({ setAuth }) => {
     setTipLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/prep/ai-tip`,
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/prep/ai-tip`,
         { role: history[0]?.role || "Software Developer", overallScore: data?.averageScore || 0, totalInterviews: data?.totalInterviews || 0 },
         { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
@@ -171,20 +164,20 @@ const Dashboard = ({ setAuth }) => {
   };
 
   if (loading) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "var(--bg)" }}>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ width: 44, height: 44, borderRadius: "50%", border: "3px solid var(--border2)", borderTopColor: "var(--indigo)", animation: "spin 0.8s linear infinite", margin: "0 auto 14px" }} />
+    <div className="db-loading">
+      <div className="db-loading-inner">
+        <div className="db-spinner" />
         <p style={{ color: "var(--text2)", fontSize: 14 }}>Loading dashboard…</p>
       </div>
     </div>
   );
 
   const radarData = [
-    { skill: "Accuracy", value: Math.min(100, Math.round(((data?.averageScore || 0) / 50) * 100)) },
+    { skill: "Accuracy",    value: Math.min(100, Math.round(((data?.averageScore || 0) / 50) * 100)) },
     { skill: "Consistency", value: Math.min(100, (data?.completed || 0) * 20) },
-    { skill: "Breadth", value: Math.min(100, Object.keys(data?.roleStats || {}).length * 25) },
-    { skill: "Streak", value: Math.min(100, (streak?.streak || 0) * 15) },
-    { skill: "Growth", value: Math.min(100, (data?.scoreTrend?.length || 0) > 1 ? 65 : 30) },
+    { skill: "Breadth",     value: Math.min(100, Object.keys(data?.roleStats || {}).length * 25) },
+    { skill: "Streak",      value: Math.min(100, (streak?.streak || 0) * 15) },
+    { skill: "Growth",      value: Math.min(100, (data?.scoreTrend?.length || 0) > 1 ? 65 : 30) },
   ];
   const trendData = (data?.scoreTrend || []).map((s, i) => ({ n: `#${i + 1}`, score: s.score }));
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -193,50 +186,34 @@ const Dashboard = ({ setAuth }) => {
     <div className="page" style={{ background: "var(--bg)" }}>
       <div className="container" style={{ paddingTop: 88, paddingBottom: 60 }}>
 
-        {/* ── HEADER ROW: title left, streak+heatmap top-right ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 28, alignItems: "flex-start", marginBottom: 28 }}>
-          {/* Left: title + action buttons */}
+        {/* ── HEADER ROW ── */}
+        <div className="db-header-grid">
           <div>
             <p style={{ fontSize: 13, color: "var(--muted2)", marginBottom: 4 }}>Welcome back,</p>
             <h1 style={{ fontSize: "clamp(22px,4vw,34px)", fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em", lineHeight: 1, marginBottom: 16 }}>
-              {user.name || "Candidate"} <span >👋</span>
+              {user.name || "Candidate"} <span>👋</span>
             </h1>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="db-action-row">
               <button className="btn btn-ghost btn-sm" onClick={() => navigate("/prep")}>📚 Prep Library</button>
               <button className="btn btn-primary btn-sm" onClick={() => navigate("/interview")}>+ New Interview</button>
             </div>
           </div>
 
-          {/* Right: heatmap calendar box */}
           <div className="card card-p" style={{ borderRadius: 18 }}>
-            {/* Daily challenge row */}
             {streak?.dailyChallenge && (
               <div
+                className="db-challenge-row"
                 onClick={() => !streak.dailyChallenge.completed && navigate("/interview", { state: { role: "Software Developer", mode: "text" } })}
                 style={{
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: 14,
-  paddingBottom: 14,
-  borderBottom: "1px solid var(--border)",
-  cursor: streak.dailyChallenge.completed ? "default" : "pointer",
-  borderRadius: 10,
-  padding: "10px 12px",
-  background: streak.dailyChallenge.completed
-    ? "rgba(16,185,129,0.05)"
-    : "rgba(99,102,241,0.05)",
-  border: `1px solid ${
-    streak.dailyChallenge.completed
-      ? "rgba(16,185,129,0.2)"
-      : "rgba(99,102,241,0.2)"
-  }`,
-  transition: "all 0.2s"
-}}
+                  cursor: streak.dailyChallenge.completed ? "default" : "pointer",
+                  background: streak.dailyChallenge.completed ? "rgba(16,185,129,0.05)" : "rgba(99,102,241,0.05)",
+                  border: `1px solid ${streak.dailyChallenge.completed ? "rgba(16,185,129,0.2)" : "rgba(99,102,241,0.2)"}`,
+                  marginBottom: 14,
+                }}
                 onMouseOver={e => { if (!streak.dailyChallenge.completed) e.currentTarget.style.background = "rgba(99,102,241,0.1)"; }}
                 onMouseOut={e => { if (!streak.dailyChallenge.completed) e.currentTarget.style.background = "rgba(99,102,241,0.05)"; }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div className="db-challenge-inner">
                   <span style={{ fontSize: 22 }}>{streak.dailyChallenge.completed ? "✅" : "🎯"}</span>
                   <div>
                     <div style={{ fontSize: 10, fontWeight: 700, color: streak.dailyChallenge.completed ? "#10b981" : "var(--indigo)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Daily Challenge</div>
@@ -244,7 +221,7 @@ const Dashboard = ({ setAuth }) => {
                     <div style={{ fontSize: 11, color: "var(--text2)" }}>{streak.dailyChallenge.description}</div>
                   </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+                <div className="db-challenge-badge-col">
                   <span className={streak.dailyChallenge.completed ? "badge badge-green" : "badge badge-indigo"} style={{ fontSize: 11, whiteSpace: "nowrap" }}>
                     {streak.dailyChallenge.completed ? "✓ Done" : "Start →"}
                   </span>
@@ -254,32 +231,30 @@ const Dashboard = ({ setAuth }) => {
                 </div>
               </div>
             )}
-            {/* Calendar heatmap */}
             <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>📅 Activity — Last 70 Days</div>
             <CalendarHeatmap activity={activity} streak={streak?.streak || 0} />
           </div>
         </div>
 
         {/* ── STAT CARDS ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 14 }}>
+        <div className="db-stat-grid">
           {[
-            { label: "Interviews", val: data?.totalInterviews || 0, color: "var(--indigo)", icon: "📝", grad: "var(--grad)" },
-            { label: "Best Score", val: data?.bestScore || 0, color: "#a855f7", icon: "🏆", grad: "linear-gradient(135deg,#a855f7,#ec4899)" },
-            { label: "Avg Score", val: data?.averageScore || 0, color: "var(--cyan)", icon: "📊", grad: "var(--grad2)" },
-            { label: "Day Streak", val: `${streak?.streak || 0}🔥`, color: "#f97316", icon: "🔥", grad: "var(--grad-warm)" },
-            { label: "Completed", val: data?.completed || 0, color: "var(--green)", icon: "✅", grad: "var(--grad-green)" },
+            { label: "Interviews", val: data?.totalInterviews || 0, icon: "📝", grad: "var(--grad)" },
+            { label: "Best Score",  val: data?.bestScore || 0,       icon: "🏆", grad: "linear-gradient(135deg,#a855f7,#ec4899)" },
+            { label: "Avg Score",   val: data?.averageScore || 0,    icon: "📊", grad: "var(--grad2)" },
+            { label: "Day Streak",  val: `${streak?.streak || 0}🔥`, icon: "🔥", grad: "var(--grad-warm)" },
+            { label: "Completed",   val: data?.completed || 0,       icon: "✅", grad: "var(--grad-green)" },
           ].map(s => (
-            <div key={s.label} className="card" style={{ padding: "20px 16px", textAlign: "center" }}>
-              <div style={{ fontSize: 20, marginBottom: 8 }}>{s.icon}</div>
-              <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, background: s.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{s.val}</div>
-              <div style={{ fontSize: 11, color: "var(--muted2)", marginTop: 6 }}>{s.label}</div>
+            <div key={s.label} className="card db-stat-card">
+              <div className="db-stat-icon">{s.icon}</div>
+              <div className="db-stat-val" style={{ background: s.grad }}>{s.val}</div>
+              <div className="db-stat-label">{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* ── CHARTS ROW ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 2fr", gap: 12, marginBottom: 12 }}>
-          {/* Radar */}
+        <div className="db-charts-grid">
           <div className="card card-p">
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>🕸 Skill Radar</div>
             <ResponsiveContainer width="100%" height={180}>
@@ -291,16 +266,14 @@ const Dashboard = ({ setAuth }) => {
             </ResponsiveContainer>
           </div>
 
-          {/* Gauges */}
           <div className="card card-p">
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>🎯 Performance</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-              <Gauge value={data?.averageScore || 0} max={50} label="Avg" color="#6366f1" />
-              <Gauge value={data?.bestScore || 0} max={50} label="Best" color="#06b6d4" />
+            <div className="db-gauge-grid">
+              <Gauge value={data?.averageScore || 0} max={50} label="Avg"  color="#6366f1" />
+              <Gauge value={data?.bestScore || 0}    max={50} label="Best" color="#06b6d4" />
             </div>
           </div>
 
-          {/* Trend */}
           <div className="card card-p">
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>📈 Score Trend</div>
             {trendData.length > 0 ? (
@@ -315,14 +288,16 @@ const Dashboard = ({ setAuth }) => {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 180, color: "var(--muted2)", fontSize: 13 }}>Complete interviews to see trends</div>}
+            ) : (
+              <div className="db-no-data-center">Complete interviews to see trends</div>
+            )}
           </div>
         </div>
 
         {/* ── AI TIPS + ROLES ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: 12, marginBottom: 12 }}>
+        <div className="db-bottom-grid">
           <div className="card card-p">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <div className="db-tips-header">
               <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>💡 AI Coaching</div>
               <button className="btn btn-ghost btn-sm" onClick={fetchTip} disabled={tipLoading}>{tipLoading ? "..." : "Get tips"}</button>
             </div>
@@ -332,8 +307,8 @@ const Dashboard = ({ setAuth }) => {
                   <p style={{ fontSize: 13, fontStyle: "italic", color: "var(--text2)", lineHeight: 1.7, margin: 0 }}>"{aiTip.encouragement}"</p>
                 </div>
                 {(aiTip.tips || []).map((t, i) => (
-                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--grad)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: "#fff", flexShrink: 0, marginTop: 2 }}>{i + 1}</div>
+                  <div key={i} className="db-tip-item">
+                    <div className="db-tip-num">{i + 1}</div>
                     <p style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.7, margin: 0 }}>{t}</p>
                   </div>
                 ))}
@@ -346,8 +321,8 @@ const Dashboard = ({ setAuth }) => {
             {Object.keys(data?.roleStats || {}).length === 0
               ? <div style={{ textAlign: "center", padding: "20px 0", color: "var(--muted2)", fontSize: 13 }}>Practice different roles to see breakdown</div>
               : Object.entries(data.roleStats).map(([role, count]) => (
-                <div key={role} style={{ marginBottom: 12 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                <div key={role} className="db-roles-item">
+                  <div className="db-roles-row">
                     <span style={{ fontSize: 13, color: "var(--text2)" }}>{role}</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "var(--indigo)" }}>{count}×</span>
                   </div>
@@ -371,20 +346,17 @@ const Dashboard = ({ setAuth }) => {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {history.map(item => (
-                <div key={item._id} onClick={() => fetchDetail(item._id)} style={{ padding: "14px 18px", borderRadius: 12, border: "1px solid var(--border)", background: "var(--bg3)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, transition: "all 0.18s" }}
-                  onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.4)"; e.currentTarget.style.background = "rgba(99,102,241,0.05)"; }}
-                  onMouseOut={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "var(--bg3)"; }}
-                >
+                <div key={item._id} className="db-history-item" onClick={() => fetchDetail(item._id)}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 5 }}>{item.role}</div>
-                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                    <div className="db-history-badges">
                       <span className="badge badge-indigo" style={{ fontSize: 10 }}>{item.level}</span>
                       <span className="badge" style={{ background: "var(--surface2)", border: "1px solid var(--border)", color: "var(--muted2)", fontSize: 10 }}>{item.difficulty || "medium"}</span>
                       <span style={{ fontSize: 12, color: "var(--muted2)" }}>{new Date(item.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: 22, fontWeight: 800, background: "var(--grad)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1, marginBottom: 4 }}>
+                    <div className="db-history-score">
                       {item.overallScore}<span style={{ fontSize: 12, WebkitTextFillColor: "var(--muted2)", fontWeight: 400 }}>/50</span>
                     </div>
                     <span className={`badge ${item.status === "completed" ? "badge-green" : "badge-indigo"}`} style={{ fontSize: 10 }}>{item.status}</span>
@@ -401,15 +373,17 @@ const Dashboard = ({ setAuth }) => {
         title={<span>{selected?.role} — Results</span>}>
         {selected && (
           <div>
-            <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
+            <div className="db-modal-header">
               <span className="badge badge-indigo">{selected.level}</span>
               <span className="badge" style={{ background: "var(--bg3)", border: "1px solid var(--border)", color: "var(--muted2)" }}>{selected.difficulty}</span>
               <span style={{ color: "var(--muted2)", fontSize: 13 }}>{new Date(selected.createdAt).toLocaleString()}</span>
-              <span style={{ marginLeft: "auto", fontSize: 18, fontWeight: 800, background: "var(--grad)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <span className="db-modal-score" style={{ marginLeft: "auto" }}>
                 {selected.overallScore} / {selected.questions?.length * 10}
               </span>
             </div>
-            <div className="prog-track" style={{ height: 8, marginBottom: 18 }}><div className="prog-fill" style={{ width: `${Math.round((selected.overallScore / (selected.questions?.length * 10)) * 100)}%` }} /></div>
+            <div className="prog-track" style={{ height: 8, marginBottom: 18 }}>
+              <div className="prog-fill" style={{ width: `${Math.round((selected.overallScore / (selected.questions?.length * 10)) * 100)}%` }} />
+            </div>
             {selected.deepDiveFeedback?.summary && (
               <div style={{ padding: "12px 16px", background: "rgba(99,102,241,0.07)", borderRadius: 10, borderLeft: "3px solid var(--indigo)", marginBottom: 16 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "var(--indigo)", textTransform: "uppercase", marginBottom: 5 }}>AI Summary</div>
@@ -418,7 +392,7 @@ const Dashboard = ({ setAuth }) => {
             )}
             {selected.questions?.map((q, i) => (
               <div key={i} style={{ marginBottom: 10, padding: "14px 16px", borderRadius: 11, border: `1px solid ${scoreColor(q.score)}40` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                <div className="db-modal-q-header">
                   <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", flex: 1, marginRight: 12 }}>Q{i + 1}. {q.question}</span>
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${scoreColor(q.score)}18`, border: `2px solid ${scoreColor(q.score)}`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 11, color: scoreColor(q.score), flexShrink: 0 }}>{q.score}/10</div>
                 </div>

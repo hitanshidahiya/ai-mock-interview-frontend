@@ -24,11 +24,10 @@ const Landing = () => {
 
       {/* ── HERO ── */}
       <section className="mesh-bg" style={{ minHeight: "calc(100vh - 62px)", display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
-        {/* Subtle grid */}
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, var(--border) 1px, transparent 1px)", backgroundSize: "32px 32px", opacity: 0.6, pointerEvents: "none" }} />
 
         <div className="container" style={{ paddingTop: 60, paddingBottom: 80, position: "relative", zIndex: 1 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+          <div className="hero-grid">
 
             {/* Left copy */}
             <div>
@@ -46,7 +45,7 @@ const Landing = () => {
                 Practice with AI-generated interview questions, get scored instantly, and track improvement with professional analytics — free.
               </p>
 
-              <div className="anim-up-3" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 52 }}>
+              <div className="hero-cta-row anim-up-3">
                 <button className="btn btn-primary btn-xl" onClick={() => navigate("/register")}>
                   Start for free
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -54,44 +53,44 @@ const Landing = () => {
                 <button className="btn btn-secondary btn-xl" onClick={() => navigate("/login")}>Sign in</button>
               </div>
 
-              <div className="anim-up-4" style={{ display: "flex", gap: 36, flexWrap: "wrap" }}>
+              <div className="hero-stats anim-up-4">
                 {[["Any role", "Technical or non-technical"], ["3 modes", "Text, voice, code editor"], ["70 days", "Activity heatmap tracking"]].map(([v, l]) => (
                   <div key={l}>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: "var(--indigo)", lineHeight: 1 }}>{v}</div>
-                    <div style={{ fontSize: 12, color: "var(--muted2)", marginTop: 3 }}>{l}</div>
+                    <div className="hero-stat-val">{v}</div>
+                    <div className="hero-stat-label">{l}</div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Right — UI preview */}
-            <div className="anim-float anim-up-2" style={{ position: "relative" }}>
-              <div style={{ position: "absolute", inset: -32, background: "radial-gradient(ellipse at center, rgba(99,102,241,0.13) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
-              <div className="card" style={{ padding: 24, borderRadius: 24, boxShadow: "var(--shadow-lg)" }}>
-                <div style={{ display: "flex", gap: 7, marginBottom: 20, alignItems: "center" }}>
-                  {["#ff5f57","#ffbd2e","#28c840"].map(c => <div key={c} style={{ width: 11, height: 11, borderRadius: "50%", background: c }} />)}
-                  <div style={{ flex: 1, height: 22, background: "var(--bg3)", borderRadius: 6, marginLeft: 10 }} />
+            <div className="anim-float anim-up-2 hero-preview" style={{ position: "relative" }}>
+              <div className="hero-preview-glow" />
+              <div className="card preview-card">
+                <div className="preview-dots">
+                  {["#ff5f57","#ffbd2e","#28c840"].map(c => <div key={c} className="preview-dot" style={{ background: c }} />)}
+                  <div className="preview-title-bar" />
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                <div className="preview-stats-grid">
                   {[["12","Interviews","#6366f1"],["42","Avg Score","#a855f7"],["7 🔥","Streak","#f059b0"]].map(([v,l,c]) => (
-                    <div key={l} style={{ background: "var(--bg3)", borderRadius: 12, padding: "14px 10px", textAlign: "center", border: "1px solid var(--border)" }}>
-                      <div style={{ fontSize: 20, fontWeight: 800, color: c, lineHeight: 1 }}>{v}</div>
-                      <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 4 }}>{l}</div>
+                    <div key={l} className="preview-stat-box">
+                      <div className="preview-stat-num" style={{ color: c }}>{v}</div>
+                      <div className="preview-stat-lbl">{l}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ background: "var(--bg3)", borderRadius: 12, padding: "14px 16px", marginBottom: 12, border: "1px solid var(--border)" }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "var(--muted2)", marginBottom: 10 }}>Score trend</div>
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: 5, height: 52 }}>
+                <div className="preview-trend-box">
+                  <div className="preview-trend-label">Score trend</div>
+                  <div className="preview-bars">
                     {[30,44,36,54,42,60,50,68,56,78].map((h,i) => (
                       <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: "4px 4px 0 0", background: i===9 ? "var(--grad)" : "rgba(99,102,241,0.22)" }} />
                     ))}
                   </div>
                 </div>
-                <div style={{ background: "rgba(99,102,241,0.08)", borderRadius: 12, padding: 14, border: "1px solid rgba(99,102,241,0.2)" }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "var(--indigo)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>Current Question</div>
-                  <div style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.5 }}>Explain the difference between useCallback and useMemo in React…</div>
-                  <div style={{ display: "flex", gap: 8, marginTop: 10, alignItems: "center" }}>
+                <div className="preview-question-box">
+                  <div className="preview-q-label">Current Question</div>
+                  <div className="preview-q-text">Explain the difference between useCallback and useMemo in React…</div>
+                  <div className="preview-q-prog">
                     <div style={{ height: 6, borderRadius: 100, background: "var(--grad)", width: "60%" }} />
                     <div style={{ fontSize: 10, color: "var(--muted)" }}>Q3 / 5</div>
                   </div>
@@ -112,11 +111,11 @@ const Landing = () => {
             </h2>
             <p style={{ color: "var(--text2)", fontSize: 16, maxWidth: 400, margin: "0 auto" }}>From zero to confident in one session.</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+          <div className="steps-grid">
             {steps.map((s) => (
               <div key={s.num} className="fcard" style={{ textAlign: "center" }}>
                 <div style={{ width: 56, height: 56, borderRadius: 18, background: "var(--grad)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, margin: "0 auto 18px", boxShadow: "0 4px 18px rgba(99,102,241,0.35)" }}>{s.icon}</div>
-                <div style={{ display: "inline-block", fontSize: 11, fontWeight: 700, color: "var(--indigo)", background: "rgba(99,102,241,0.1)", padding: "3px 10px", borderRadius: 100, marginBottom: 10 }}>{s.num}</div>
+                <div className="step-num-badge">{s.num}</div>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>{s.title}</h3>
                 <p style={{ color: "var(--text2)", fontSize: 14, lineHeight: 1.7 }}>{s.desc}</p>
               </div>
@@ -125,7 +124,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ── FEATURES — proper bento ── */}
+      {/* ── FEATURES ── */}
       <section className="section">
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: 56 }}>
@@ -137,26 +136,26 @@ const Landing = () => {
           </div>
 
           {/* Row 1: big left + small right */}
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }}>
-            <div className="fcard" style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
-              <div style={{ width: 52, height: 52, borderRadius: 16, background: features[0].bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0, border: `1px solid ${features[0].color}30` }}>{features[0].icon}</div>
+          <div className="bento-row-a">
+            <div className="fcard fcard-horizontal">
+              <div className="feature-icon-box" style={{ width: 52, height: 52, background: features[0].bg, border: `1px solid ${features[0].color}30` }}>{features[0].icon}</div>
               <div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{features[0].title}</h3>
                 <p style={{ fontSize: 14, color: "var(--text2)", lineHeight: 1.65, margin: 0 }}>{features[0].desc}</p>
               </div>
             </div>
             <div className="fcard">
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: features[1].bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 14, border: `1px solid ${features[1].color}30` }}>{features[1].icon}</div>
+              <div className="feature-icon-box-sm" style={{ background: features[1].bg, border: `1px solid ${features[1].color}30` }}>{features[1].icon}</div>
               <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{features[1].title}</h3>
               <p style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.65, margin: 0 }}>{features[1].desc}</p>
             </div>
           </div>
 
           {/* Row 2: three equal */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 16 }}>
+          <div className="bento-row-b">
             {features.slice(2, 5).map(f => (
               <div key={f.title} className="fcard">
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: f.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 14, border: `1px solid ${f.color}30` }}>{f.icon}</div>
+                <div className="feature-icon-box-sm" style={{ background: f.bg, border: `1px solid ${f.color}30` }}>{f.icon}</div>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{f.title}</h3>
                 <p style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.65, margin: 0 }}>{f.desc}</p>
               </div>
@@ -164,24 +163,23 @@ const Landing = () => {
           </div>
 
           {/* Row 3: small left + big right */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 16 }}>
+          <div className="bento-row-c">
             <div className="fcard">
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: features[5].bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 14, border: `1px solid ${features[5].color}30` }}>{features[5].icon}</div>
+              <div className="feature-icon-box-sm" style={{ background: features[5].bg, border: `1px solid ${features[5].color}30` }}>{features[5].icon}</div>
               <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{features[5].title}</h3>
               <p style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.65, margin: 0 }}>{features[5].desc}</p>
             </div>
-            {/* Results preview mini */}
-            <div className="fcard" style={{ background: "var(--grad-soft)", borderColor: "rgba(99,102,241,0.2)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div className="fcard results-preview">
+              <div className="results-header">
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: "var(--indigo)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>After every interview</div>
                   <div style={{ fontSize: 17, fontWeight: 700, color: "var(--text)" }}>Deep-dive AI report</div>
                 </div>
-                <div style={{ fontSize: 40, fontWeight: 800, background: "var(--grad)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>42<span style={{ fontSize: 16, WebkitTextFillColor: "var(--muted)", fontWeight: 400 }}>/50</span></div>
+                <div className="results-score">42<span className="results-score-denom">/50</span></div>
               </div>
               {[["Accuracy", 88, "var(--indigo)"], ["Communication", 74, "var(--purple)"], ["Depth", 80, "var(--pink)"]].map(([l, v, c]) => (
-                <div key={l} style={{ marginBottom: 10 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                <div key={l} className="prog-row">
+                  <div className="prog-row-header">
                     <span style={{ fontSize: 12, color: "var(--text2)" }}>{l}</span>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{v}%</span>
                   </div>
@@ -196,7 +194,7 @@ const Landing = () => {
       {/* ── CTA ── */}
       <section className="section" style={{ background: "var(--bg2)" }}>
         <div className="container">
-          <div style={{ textAlign: "center", maxWidth: 580, margin: "0 auto", padding: "72px 48px", background: "var(--grad-soft)", borderRadius: 32, border: "1px solid rgba(99,102,241,0.2)", boxShadow: "var(--shadow-lg)" }}>
+          <div className="cta-box">
             <div className="badge badge-indigo" style={{ marginBottom: 22 }}>Free forever</div>
             <h2 style={{ fontSize: "clamp(26px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-0.025em", color: "var(--text)", marginBottom: 16, lineHeight: 1.1 }}>
               Ready to ace your <span className="g-text">interview?</span>
@@ -204,7 +202,7 @@ const Landing = () => {
             <p style={{ color: "var(--text2)", fontSize: 16, marginBottom: 36, lineHeight: 1.7 }}>
               Practice with real AI questions, get scored instantly, and build the confidence to land your dream role.
             </p>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <div className="cta-btns">
               <button className="btn btn-primary btn-xl" onClick={() => navigate("/register")}>
                 Create free account
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -216,7 +214,7 @@ const Landing = () => {
       </section>
 
       <div className="divider" />
-      <div style={{ padding: "28px", textAlign: "center" }}>
+      <div className="footer-bar">
         <span style={{ color: "var(--muted)", fontSize: 13 }}>© 2025 MockAI · Built with MERN + Gemini AI</span>
       </div>
     </div>
