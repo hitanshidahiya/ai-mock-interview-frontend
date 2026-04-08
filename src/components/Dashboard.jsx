@@ -35,6 +35,7 @@ const parseLocalDate = (value) => {
     const [y, m, d] = value.split("-").map(Number);
     return new Date(y, m - 1, d);
   }
+
   const dt = new Date(value);
   return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
 };
@@ -62,30 +63,28 @@ const CalendarHeatmap = ({ activity, streak }) => {
     days.push({
       key: formatDateKey(d),
       count: actMap[formatDateKey(d)] || 0,
-      date: d,
+      date: new Date(d),
     });
   }
 
   const weeks = [];
   for (let i = 0; i < days.length; i += 7) {
     const weekDays = days.slice(i, i + 7);
-    const firstDay = weekDays[0]?.date;
-
-    const prevFirstDay = i >= 7 ? days[i - 7]?.date : null;
-    const isMonthStart =
-      i === 0 ||
-      (prevFirstDay &&
-        firstDay &&
-        prevFirstDay.getMonth() !== firstDay.getMonth());
-
-    weeks.push({
-      days: weekDays,
-      monthLabel: isMonthStart
-        ? firstDay.toLocaleString("default", { month: "short" })
-        : "",
-      isMonthStart,
-    });
+    weeks.push(weekDays);
   }
+
+  const monthLabels = weeks.map((week, i) => {
+    const firstDay = week[0].date;
+    const prevFirstDay = i > 0 ? weeks[i - 1][0].date : null;
+
+    const show =
+      i === 0 ||
+      (prevFirstDay && prevFirstDay.getMonth() !== firstDay.getMonth());
+
+    return show
+      ? firstDay.toLocaleString("default", { month: "short" })
+      : "";
+  });
 
   const cellColor = (n) => {
     if (n === 0) return "hcell-0";
@@ -95,48 +94,46 @@ const CalendarHeatmap = ({ activity, streak }) => {
   };
 
   return (
-    <div>
-      <div className="heatmap-month-row">
-        <div className="heatmap-day-spacer" />
-        {weeks.map((week, i) => (
-          <div
-            key={i}
-            className={`heatmap-month-label ${week.isMonthStart && i !== 0 ? "month-gap" : ""}`}
-          >
-            {week.monthLabel}
-          </div>
-        ))}
-      </div>
-
+    <div className="heatmap-card">
       <div className="heatmap-scroll">
-        <div className="heatmap-body">
-          <div className="heatmap-day-labels">
-            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d, i) => (
-              <div
-                key={d}
-                className="heatmap-day-label"
-                style={{ color: i % 2 === 0 ? "var(--muted)" : "transparent" }}
-              >
-                {d}
+        <div className="heatmap-grid-wrap">
+          {/* Month row */}
+          <div className="heatmap-months-grid">
+            <div></div>
+            {monthLabels.map((label, i) => (
+              <div key={i} className="heatmap-month-cell">
+                {label}
               </div>
             ))}
           </div>
 
-          {weeks.map((week, i) => (
-            <div
-              key={i}
-              className={`heatmap-week-col ${week.isMonthStart && i !== 0 ? "month-gap" : ""}`}
-            >
-              {week.days.map((day) => (
-                <Tooltip
-                  key={day.key}
-                  title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}
+          {/* Main grid */}
+          <div className="heatmap-main-grid">
+            <div className="heatmap-day-labels">
+              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d, i) => (
+                <div
+                  key={d}
+                  className="heatmap-day-label"
+                  style={{ opacity: i % 2 === 0 ? 1 : 0 }}
                 >
-                  <div className={`hcell ${cellColor(day.count)}`} />
-                </Tooltip>
+                  {d}
+                </div>
               ))}
             </div>
-          ))}
+
+            {weeks.map((week, i) => (
+              <div key={i} className="heatmap-week-col">
+                {week.map((day) => (
+                  <Tooltip
+                    key={day.key}
+                    title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}
+                  >
+                    <div className={`hcell ${cellColor(day.count)}`} />
+                  </Tooltip>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
