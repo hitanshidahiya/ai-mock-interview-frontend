@@ -31,13 +31,10 @@ const formatDateKey = (date) => {
 };
 
 const parseLocalDate = (value) => {
-  // If backend sends YYYY-MM-DD, parse as local date
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const [y, m, d] = value.split("-").map(Number);
     return new Date(y, m - 1, d);
   }
-
-  // Otherwise fallback
   const dt = new Date(value);
   return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
 };
@@ -46,8 +43,7 @@ const CalendarHeatmap = ({ activity, streak }) => {
   const actMap = {};
 
   activity.forEach((a) => {
-    const date = parseLocalDate(a.date);
-    const key = formatDateKey(date);
+    const key = formatDateKey(parseLocalDate(a.date));
     actMap[key] = a.count;
   });
 
@@ -63,29 +59,32 @@ const CalendarHeatmap = ({ activity, streak }) => {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
 
-    const key = formatDateKey(d);
-    const dow = d.getDay();
-
     days.push({
-      key,
-      count: actMap[key] || 0,
+      key: formatDateKey(d),
+      count: actMap[formatDateKey(d)] || 0,
       date: d,
-      dayName: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow],
     });
   }
 
   const weeks = [];
   for (let i = 0; i < days.length; i += 7) {
-    const week = days.slice(i, i + 7);
+    const weekDays = days.slice(i, i + 7);
+    const firstDay = weekDays[0]?.date;
 
-    const prevWeek = i > 0 ? days.slice(i - 7, i) : null;
-    const isNewMonth =
+    const prevFirstDay = i >= 7 ? days[i - 7]?.date : null;
+    const isMonthStart =
       i === 0 ||
-      (prevWeek &&
-        week[0] &&
-        prevWeek[0].date.getMonth() !== week[0].date.getMonth());
+      (prevFirstDay &&
+        firstDay &&
+        prevFirstDay.getMonth() !== firstDay.getMonth());
 
-    weeks.push({ days: week, isNewMonth });
+    weeks.push({
+      days: weekDays,
+      monthLabel: isMonthStart
+        ? firstDay.toLocaleString("default", { month: "short" })
+        : "",
+      isMonthStart,
+    });
   }
 
   const cellColor = (n) => {
@@ -98,11 +97,13 @@ const CalendarHeatmap = ({ activity, streak }) => {
   return (
     <div>
       <div className="heatmap-month-row">
+        <div className="heatmap-day-spacer" />
         {weeks.map((week, i) => (
-          <div key={i} className="heatmap-month-label">
-            {week.isNewMonth
-              ? week.days[0].date.toLocaleString("default", { month: "short" })
-              : ""}
+          <div
+            key={i}
+            className={`heatmap-month-label ${week.isMonthStart && i !== 0 ? "month-gap" : ""}`}
+          >
+            {week.monthLabel}
           </div>
         ))}
       </div>
@@ -122,19 +123,19 @@ const CalendarHeatmap = ({ activity, streak }) => {
           </div>
 
           {weeks.map((week, i) => (
-            <React.Fragment key={i}>
-              {week.isNewMonth && i !== 0 && <div style={{ width: "8px" }} />}
-              <div className="heatmap-week-col">
-                {week.days.map((day) => (
-                  <Tooltip
-                    key={day.key}
-                    title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}
-                  >
-                    <div className={`hcell ${cellColor(day.count)}`} />
-                  </Tooltip>
-                ))}
-              </div>
-            </React.Fragment>
+            <div
+              key={i}
+              className={`heatmap-week-col ${week.isMonthStart && i !== 0 ? "month-gap" : ""}`}
+            >
+              {week.days.map((day) => (
+                <Tooltip
+                  key={day.key}
+                  title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}
+                >
+                  <div className={`hcell ${cellColor(day.count)}`} />
+                </Tooltip>
+              ))}
+            </div>
           ))}
         </div>
       </div>
