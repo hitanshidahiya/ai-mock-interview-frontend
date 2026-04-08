@@ -22,17 +22,17 @@ const Login = ({ setAuth }) => {
   };
 
   return (
-    <div className="page mesh-bg dot-grid" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
-      <div style={{ width: "100%", maxWidth: 420 }}>
-        <div className="card" style={{ padding: 44, borderRadius: 28, boxShadow: "var(--shadow-lg)" }}>
-          <Link to="/" className="logo-wrap" style={{ marginBottom: 32, display: "flex" }}>
+    <div className="page mesh-bg dot-grid auth-page">
+      <div className="auth-wrapper">
+        <div className="card auth-card">
+          <Link to="/" className="logo-wrap auth-logo-wrap">
             <div className="logo-icon">⚡</div>
             <span className="logo-name">MockAI</span>
           </Link>
           <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.02em" }}>Welcome back</h1>
           <p style={{ color: "var(--text2)", fontSize: 14, marginBottom: 32 }}>Sign in to continue your interview practice.</p>
 
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <form onSubmit={handleSubmit} className="auth-form">
             <div>
               <label className="field-label">Email address</label>
               <input className="field" type="email" placeholder="you@example.com" value={form.email} onChange={set("email")} required />
@@ -41,17 +41,17 @@ const Login = ({ setAuth }) => {
               <label className="field-label">Password</label>
               <input className="field" type="password" placeholder="••••••••" value={form.password} onChange={set("password")} required />
             </div>
-            <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: "100%", justifyContent: "center", height: 48, fontSize: 15, borderRadius: 12, marginTop: 4 }}>
+            <button className="btn btn-primary auth-submit-btn" type="submit" disabled={loading}>
               {loading
-                ? <><span style={{ width: 15, height: 15, borderRadius: "50%", border: "2.5px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", animation: "spin 0.7s linear infinite", display: "inline-block" }} /> Signing in...</>
+                ? <><span className="spin-indicator" /> Signing in...</>
                 : "Sign in"}
             </button>
           </form>
 
-          <div className="divider" style={{ margin: "24px 0" }} />
+          <div className="divider auth-divider" />
           <p style={{ textAlign: "center", fontSize: 14, color: "var(--text2)" }}>
             No account?{" "}
-            <Link to="/register" style={{ color: "var(--indigo)", fontWeight: 600, textDecoration: "none" }}>Create one free →</Link>
+            <Link to="/register" className="auth-link">Create one free →</Link>
           </p>
         </div>
       </div>
