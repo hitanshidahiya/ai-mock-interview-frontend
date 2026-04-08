@@ -239,11 +239,11 @@ const Dashboard = ({ setAuth }) => {
         {/* ── STAT CARDS ── */}
         <div className="db-stat-grid">
           {[
-            { label: "Interviews", val: data?.totalInterviews || 0, icon: "📝", grad: "var(--grad)" },
-            { label: "Best Score",  val: data?.bestScore || 0,       icon: "🏆", grad: "linear-gradient(135deg,#a855f7,#ec4899)" },
-            { label: "Avg Score",   val: data?.averageScore || 0,    icon: "📊", grad: "var(--grad2)" },
-            { label: "Day Streak",  val: `${streak?.streak || 0}🔥`, icon: "🔥", grad: "var(--grad-warm)" },
-            { label: "Completed",   val: data?.completed || 0,       icon: "✅", grad: "var(--grad-green)" },
+            { label: "Interviews", val: data?.totalInterviews || 0, icon: "📝"        },
+            { label: "Best Score",  val: data?.bestScore || 0,       icon: "🏆"   },
+            { label: "Avg Score",   val: data?.averageScore || 0,    icon: "📊"       },
+            { label: "Day Streak",  val: `${streak?.streak || 0}🔥`, icon: "🔥"         },
+            { label: "Completed",   val: data?.completed || 0,       icon: "✅"        },
           ].map(s => (
             <div key={s.label} className="card db-stat-card">
               <div className="db-stat-icon">{s.icon}</div>
