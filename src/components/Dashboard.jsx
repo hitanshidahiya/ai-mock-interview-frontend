@@ -23,123 +23,122 @@ const Gauge = ({ value, max, label, color }) => {
 };
 
 /* ── Calendar heatmap ── */
-const formatDateKey = (date) => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-};
-
-const parseLocalDate = (value) => {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    const [y, m, d] = value.split("-").map(Number);
-    return new Date(y, m - 1, d);
-  }
-
-  const dt = new Date(value);
-  return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-};
-
 const CalendarHeatmap = ({ activity, streak }) => {
   const actMap = {};
-
   activity.forEach((a) => {
     const key = formatDateKey(parseLocalDate(a.date));
     actMap[key] = a.count;
   });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
+  const today = new Date(); today.setHours(0, 0, 0, 0);
   const start = new Date(today);
-  start.setDate(start.getDate() - 364);
-  start.setDate(start.getDate() - start.getDay());
+  start.setFullYear(start.getFullYear() - 1);
+  start.setDate(start.getDate() + 1);
 
-  const days = [];
-  for (let i = 0; i < 371; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
+  // Align to Sunday
+  const startSunday = new Date(start);
+  startSunday.setDate(startSunday.getDate() - startSunday.getDay());
 
-    days.push({
-      key: formatDateKey(d),
-      count: actMap[formatDateKey(d)] || 0,
+  const allDays = [];
+  for (let d = new Date(startSunday); d <= today; d.setDate(d.getDate() + 1)) {
+    allDays.push({
+      key: formatDateKey(new Date(d)),
       date: new Date(d),
+      count: actMap[formatDateKey(new Date(d))] || 0,
     });
   }
 
-  const weeks = [];
-  for (let i = 0; i < days.length; i += 7) {
-    const weekDays = days.slice(i, i + 7);
-    weeks.push(weekDays);
-  }
+  const allWeeks = [];
+  for (let i = 0; i < allDays.length; i += 7) allWeeks.push(allDays.slice(i, i + 7));
 
-  const monthLabels = weeks.map((week, i) => {
-    const firstDay = week[0].date;
-    const prevFirstDay = i > 0 ? weeks[i - 1][0].date : null;
-
-    const show =
-      i === 0 ||
-      (prevFirstDay && prevFirstDay.getMonth() !== firstDay.getMonth());
-
-    return show
-      ? firstDay.toLocaleString("default", { month: "short" })
-      : "";
+  // Group weeks by month
+  const byMonth = {};
+  allWeeks.forEach((week, wi) => {
+    const visibleDay = week.find(d => d.date >= start);
+    if (!visibleDay) return;
+    const mon = visibleDay.date.getMonth();
+    const yr = visibleDay.date.getFullYear();
+    const key = `${yr}-${mon}`;
+    if (!byMonth[key]) byMonth[key] = { month: mon, year: yr, weeks: [], firstWi: wi };
+    byMonth[key].weeks.push(week);
   });
 
+  const monthGroups = Object.values(byMonth).sort((a, b) => a.firstWi - b.firstWi);
+
   const cellColor = (n) => {
-    if (n === 0) return "hcell-0";
-    if (n === 1) return "hcell-1";
-    if (n === 2) return "hcell-2";
-    return "hcell-3";
+    if (n === 0) return 'hcell-0';
+    if (n === 1) return 'hcell-1';
+    if (n === 2) return 'hcell-2';
+    if (n === 3) return 'hcell-3';
+    return 'hcell-4';
   };
 
   return (
     <div className="heatmap-card">
       <div className="heatmap-scroll">
-        <div className="heatmap-grid-wrap">
-          {/* Month row */}
-          <div className="heatmap-months-grid">
-            <div></div>
-            {monthLabels.map((label, i) => (
-              <div key={i} className="heatmap-month-cell">
-                {label}
-              </div>
-            ))}
+        <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+
+          {/* Month labels row */}
+          <div style={{ display: 'flex', gap: 6, paddingLeft: 28, marginBottom: 4 }}>
+            {monthGroups.map((mg, i) => {
+              const totalWeeks = mg.weeks.length;
+              const width = totalWeeks * 13 + (totalWeeks - 1) * 3;
+              return (
+                <div key={i} style={{ width, fontSize: 11, color: 'var(--muted2)', flexShrink: 0 }}>
+                  {MONTHS[mg.month]}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Main grid */}
-          <div className="heatmap-main-grid">
-            <div className="heatmap-day-labels">
-              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d, i) => (
-                <div
-                  key={d}
-                  className="heatmap-day-label"
-                  style={{ opacity: i % 2 === 0 ? 1 : 0 }}
-                >
-                  {d}
+          {/* Body: day labels + month groups */}
+          <div style={{ display: 'flex', gap: 0 }}>
+
+            {/* Day labels */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginRight: 6 }}>
+              {DAY_LABELS.map((lb, i) => (
+                <div key={i} style={{ height: 13, fontSize: 11, color: 'var(--muted2)', lineHeight: '13px', textAlign: 'right', minWidth: 22 }}>
+                  {lb}
                 </div>
               ))}
             </div>
 
-            {weeks.map((week, i) => (
-              <div key={i} className="heatmap-week-col">
-                {week.map((day) => (
-                  <Tooltip
-                    key={day.key}
-                    title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}
-                  >
-                    <div className={`hcell ${cellColor(day.count)}`} />
-                  </Tooltip>
-                ))}
-              </div>
-            ))}
+            {/* Month groups with gap between them */}
+            <div style={{ display: 'flex', gap: 6 }}>
+              {monthGroups.map((mg, mi) => (
+                <div key={mi} style={{ display: 'flex', gap: 3 }}>
+                  {mg.weeks.map((week, wi) => (
+                    <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                      {week.map((day) => {
+                        const isFuture = day.date > today;
+                        const isBeforeStart = day.date < start;
+                        return (
+                          <Tooltip
+                            key={day.key}
+                            title={`${day.key}: ${day.count} interview${day.count !== 1 ? 's' : ''}`}
+                          >
+                            <div
+                              className={`hcell ${isFuture || isBeforeStart ? 'hcell-hidden' : cellColor(day.count)}`}
+                            />
+                          </Tooltip>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
       </div>
 
       <div className="heatmap-legend">
         <span>Less</span>
-        {["hcell-0", "hcell-1", "hcell-2", "hcell-3"].map((c) => (
+        {['hcell-0','hcell-1','hcell-2','hcell-3','hcell-4'].map((c) => (
           <div key={c} className={`hcell ${c}`} />
         ))}
         <span>More</span>

@@ -1727,18 +1727,6 @@ html.dark .mesh-bg {
   line-height: 12px;
 }
 
-
-.hcell {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-.hcell-0 { background: #ebedf0; }
-.hcell-1 { background: #c7d2fe; }
-.hcell-2 { background: #818cf8; }
-.hcell-3 { background: #4f46e5; }
-
 .heatmap-legend {
   display: flex;
   align-items: center;
@@ -1791,28 +1779,13 @@ html.dark .mesh-bg {
   margin-left: 8px;
 }
 
-.hcell {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-/* colors */
-.hcell-0 {
-  background: #e5e7eb;
-}
-
-.hcell-1 {
-  background: #c7d2fe;
-}
-
-.hcell-2 {
-  background: #818cf8;
-}
-
-.hcell-3 {
-  background: #4f46e5;
-}
+.hcell { width: 13px; height: 13px; border-radius: 3px; }
+.hcell-hidden { visibility: hidden; }
+.hcell-0 { background: var(--bg3); border: 1px solid var(--border); }
+.hcell-1 { background: #9be9a8; }
+.hcell-2 { background: #40c463; }
+.hcell-3 { background: #30a14e; }
+.hcell-4 { background: #216e39; }
 
 /* ══════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
