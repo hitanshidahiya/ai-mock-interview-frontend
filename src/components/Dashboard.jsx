@@ -67,13 +67,6 @@ const CalendarHeatmap = ({ activity, streak }) => {
     return "hcell-3";
   };
 
-  const monthLabels = [];
-  weeks.forEach((week, wi) => {
-    const first = week[0].date;
-    monthLabels[wi] = (first.getDate() <= 7 || wi === 0)
-      ? first.toLocaleString("default", { month: "short" })
-      : "";
-  });
 
   // return (
   //   <div>
