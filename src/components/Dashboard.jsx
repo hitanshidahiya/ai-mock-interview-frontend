@@ -23,55 +23,71 @@ const Gauge = ({ value, max, label, color }) => {
 };
 
 /* ── Calendar heatmap ── */
+const formatDateKey = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const parseLocalDate = (value) => {
+  // If backend sends YYYY-MM-DD, parse as local date
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  // Otherwise fallback
+  const dt = new Date(value);
+  return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+};
+
 const CalendarHeatmap = ({ activity, streak }) => {
-  // ✅ Normalize backend dates
   const actMap = {};
-  activity.forEach(a => {
-    const date = new Date(a.date).toLocaleDateString("en-CA");
-    actMap[date] = a.count;
+
+  activity.forEach((a) => {
+    const date = parseLocalDate(a.date);
+    const key = formatDateKey(date);
+    actMap[key] = a.count;
   });
 
-  // ✅ Today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // ✅ Start from 365 days ago
   const start = new Date(today);
   start.setDate(start.getDate() - 364);
-
-  // ✅ Align to Sunday (IMPORTANT for correct layout)
   start.setDate(start.getDate() - start.getDay());
 
-  // ✅ Generate days (53 weeks * 7 = 371 days)
   const days = [];
   for (let i = 0; i < 371; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
 
-    const key = d.toLocaleDateString("en-CA");
+    const key = formatDateKey(d);
     const dow = d.getDay();
 
     days.push({
       key,
       count: actMap[key] || 0,
       date: d,
-      dayName: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow]
+      dayName: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][dow],
     });
   }
 
-  // ✅ Build weeks (safe + aligned)
   const weeks = [];
   for (let i = 0; i < days.length; i += 7) {
     const week = days.slice(i, i + 7);
 
+    const prevWeek = i > 0 ? days.slice(i - 7, i) : null;
     const isNewMonth =
       i === 0 ||
-      (week[0] && week[0].date.getDate() <= 7);
+      (prevWeek &&
+        week[0] &&
+        prevWeek[0].date.getMonth() !== week[0].date.getMonth());
 
     weeks.push({ days: week, isNewMonth });
   }
 
-  // ✅ Color logic
   const cellColor = (n) => {
     if (n === 0) return "hcell-0";
     if (n === 1) return "hcell-1";
@@ -81,52 +97,38 @@ const CalendarHeatmap = ({ activity, streak }) => {
 
   return (
     <div>
-      {/* Month Labels */}
       <div className="heatmap-month-row">
         {weeks.map((week, i) => (
           <div key={i} className="heatmap-month-label">
-            {week.isNewMonth && week.days[0]
-              ? week.days[0].date.toLocaleString("default", {
-                  month: "short"
-                })
+            {week.isNewMonth
+              ? week.days[0].date.toLocaleString("default", { month: "short" })
               : ""}
           </div>
         ))}
       </div>
 
-      {/* Heatmap */}
       <div className="heatmap-scroll">
         <div className="heatmap-body">
-          {/* Day Labels */}
           <div className="heatmap-day-labels">
             {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d, i) => (
               <div
                 key={d}
                 className="heatmap-day-label"
-                style={{
-                  color: i % 2 === 0 ? "var(--muted)" : "transparent"
-                }}
+                style={{ color: i % 2 === 0 ? "var(--muted)" : "transparent" }}
               >
                 {d}
               </div>
             ))}
           </div>
 
-          {/* Weeks */}
           {weeks.map((week, i) => (
             <React.Fragment key={i}>
-              {/* Month gap */}
-              {week.isNewMonth && i !== 0 && (
-                <div style={{ width: "8px" }} />
-              )}
-
+              {week.isNewMonth && i !== 0 && <div style={{ width: "8px" }} />}
               <div className="heatmap-week-col">
                 {week.days.map((day) => (
                   <Tooltip
                     key={day.key}
-                    title={`${day.key}: ${day.count} interview${
-                      day.count !== 1 ? "s" : ""
-                    }`}
+                    title={`${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`}
                   >
                     <div className={`hcell ${cellColor(day.count)}`} />
                   </Tooltip>
@@ -137,16 +139,13 @@ const CalendarHeatmap = ({ activity, streak }) => {
         </div>
       </div>
 
-      {/* Legend */}
       <div className="heatmap-legend">
         <span>Less</span>
         {["hcell-0", "hcell-1", "hcell-2", "hcell-3"].map((c) => (
           <div key={c} className={`hcell ${c}`} />
         ))}
         <span>More</span>
-        <span className="heatmap-legend-streak">
-          {streak} day streak 🔥
-        </span>
+        <span className="heatmap-legend-streak">{streak} day streak 🔥</span>
       </div>
     </div>
   );
