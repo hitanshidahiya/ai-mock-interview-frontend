@@ -15,7 +15,6 @@ const Register = ({ setAuth }) => {
     try {
       const url = `${import.meta.env.VITE_API_URL}/auth/register`;
       console.log("REGISTER URL:", url);
-
       const res = await axios.post(url, form, { withCredentials: true });
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
@@ -25,17 +24,17 @@ const Register = ({ setAuth }) => {
   };
 
   return (
-    <div className="page mesh-bg dot-grid" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
-      <div style={{ width: "100%", maxWidth: 420 }}>
-        <div className="card" style={{ padding: 44, borderRadius: 28, boxShadow: "var(--shadow-lg)" }}>
-          <Link to="/" className="logo-wrap" style={{ marginBottom: 32, display: "flex" }}>
+    <div className="page mesh-bg dot-grid auth-page">
+      <div className="auth-wrapper">
+        <div className="card auth-card">
+          <Link to="/" className="logo-wrap auth-logo-wrap">
             <div className="logo-icon">⚡</div>
             <span className="logo-name">MockAI</span>
           </Link>
           <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.02em" }}>Create your account</h1>
           <p style={{ color: "var(--text2)", fontSize: 14, marginBottom: 32 }}>Free forever. No credit card required.</p>
 
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <form onSubmit={handleSubmit} className="auth-form auth-form-gap-sm">
             <div>
               <label className="field-label">Full name</label>
               <input className="field" type="text" placeholder="John Doe" value={form.name} onChange={set("name")} required />
@@ -48,17 +47,17 @@ const Register = ({ setAuth }) => {
               <label className="field-label">Password</label>
               <input className="field" type="password" placeholder="••••••••" value={form.password} onChange={set("password")} required />
             </div>
-            <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: "100%", justifyContent: "center", height: 48, fontSize: 15, borderRadius: 12, marginTop: 6 }}>
+            <button className="btn btn-primary auth-submit-btn" type="submit" disabled={loading} style={{ marginTop: 6 }}>
               {loading
-                ? <><span style={{ width: 15, height: 15, borderRadius: "50%", border: "2.5px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", animation: "spin 0.7s linear infinite", display: "inline-block" }} /> Creating account...</>
+                ? <><span className="spin-indicator" /> Creating account...</>
                 : "Get started free →"}
             </button>
           </form>
 
-          <div className="divider" style={{ margin: "24px 0" }} />
+          <div className="divider auth-divider" />
           <p style={{ textAlign: "center", fontSize: 14, color: "var(--text2)" }}>
             Already have an account?{" "}
-            <Link to="/login" style={{ color: "var(--indigo)", fontWeight: 600, textDecoration: "none" }}>Sign in</Link>
+            <Link to="/login" className="auth-link">Sign in</Link>
           </p>
         </div>
       </div>
@@ -67,3 +66,4 @@ const Register = ({ setAuth }) => {
 };
 
 export default Register;
+
