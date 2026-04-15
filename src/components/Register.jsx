@@ -96,7 +96,7 @@ const Register = ({ setAuth }) => {
                 <input
                   className="auth-field-v2"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Hitanshi"
                   value={form.name}
                   onChange={set("name")}
                   required
@@ -111,7 +111,7 @@ const Register = ({ setAuth }) => {
                 <input
                   className="auth-field-v2"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="hitanshi@example.com"
                   value={form.email}
                   onChange={set("email")}
                   required
