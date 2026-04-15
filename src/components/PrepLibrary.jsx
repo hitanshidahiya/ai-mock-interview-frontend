@@ -12,42 +12,34 @@ const PrepLibrary = () => {
   const [role, setRole]       = useState("");
   const [level, setLevel]     = useState("intermediate");
   const [loading, setLoading] = useState(false);
-  const [allData, setAllData] = useState(null);
+  const [allData, setAllData] = useState({});
   const [activeTab, setActiveTab] = useState("technical");
   const [open, setOpen]       = useState(null);
 
   const showDsa = role.trim() && isTech(role);
 
-  const fetchAll = async () => {
+  const fetchByCategory = async (category) => {
     if (!role.trim()) { message.warning("Please enter a job role first"); return; }
-    setLoading(true); setAllData(null); setOpen(null);
+
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const opts = { headers: { Authorization: `Bearer ${token}` }, withCredentials: true };
-      const cats = ["technical", "hr", ...(isTech(role) ? ["dsa"] : [])];
-      const results = [];
 
-for (const c of cats) {
-  const res = await Promise.all([
-    axios.get(
-      `${import.meta.env.VITE_API_URL}/prep/questions?category=${c}&role=${encodeURIComponent(role)}&level=${level}`,
-      opts
-    )
-      .then(r => ({ cat: c, questions: r.data.questions || [] }))
-      .catch(err => {
-        console.error(`Error in ${c}:`, err);
-        return { cat: c, questions: [] };
-      })
-  ]);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/prep/questions?category=${category}&role=${encodeURIComponent(role)}&level=${level}`,
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true, timeout: 60000 }
+      );
 
-  results.push(res[0]);
-}
+      setAllData(prev => ({
+        ...prev,
+        [category]: res.data.questions || []
+      }));
 
-const data = {};
-results.forEach(r => { data[r.cat] = r.questions; });
-      setAllData(data);
-      setActiveTab("technical");
-    } catch { message.error("Failed to generate questions"); }
+    } catch (err) {
+      console.error(err);
+      message.error(`Failed to load ${category} questions`);
+    }
+
     setLoading(false);
   };
 
@@ -82,7 +74,7 @@ results.forEach(r => { data[r.cat] = r.questions; });
                 placeholder="e.g. React Developer, HR Manager, Marketing Lead, Chef…"
                 value={role}
                 onChange={e => { setRole(e.target.value); setAllData(null); }}
-                onKeyDown={e => e.key === "Enter" && fetchAll()}
+                onKeyDown={e => e.key === "Enter" && fetchByCategory(activeTab)}
               />
             </div>
             <div>
@@ -91,7 +83,7 @@ results.forEach(r => { data[r.cat] = r.questions; });
                 {["beginner","intermediate","advanced"].map(l => <option key={l} value={l}>{l.charAt(0).toUpperCase()+l.slice(1)}</option>)}
               </select>
             </div>
-            <button className="btn btn-primary" onClick={fetchAll} disabled={loading} style={{ height: 46, paddingLeft: 24, paddingRight: 24 }}>
+            <button className="btn btn-primary" onClick={() => fetchByCategory(activeTab)} disabled={loading} style={{ height: 46, paddingLeft: 24, paddingRight: 24 }}>
               {loading ? (
                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span className="spin-indicator" />
@@ -112,7 +104,13 @@ results.forEach(r => { data[r.cat] = r.questions; });
         {(allData || loading) && (
           <div className="pl-tabs-row">
             {tabs.map(t => (
-              <button key={t.key} onClick={() => { setActiveTab(t.key); setOpen(null); }} className="btn" style={{
+              <button key={t.key} onClick={() => {
+                setActiveTab(t.key);
+                setOpen(null);
+                if (!allData?.[t.key]) {
+                  fetchByCategory(t.key);
+                }
+              }} className="btn" style={{
                 background: activeTab === t.key ? "rgba(99,102,241,0.12)" : "var(--surface)",
                 border: `1.5px solid ${activeTab === t.key ? "rgba(99,102,241,0.4)" : "var(--border)"}`,
                 color: activeTab === t.key ? "var(--indigo)" : "var(--text2)",
