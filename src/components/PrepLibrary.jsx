@@ -25,15 +25,26 @@ const PrepLibrary = () => {
       const token = localStorage.getItem("token");
       const opts = { headers: { Authorization: `Bearer ${token}` }, withCredentials: true };
       const cats = ["technical", "hr", ...(isTech(role) ? ["dsa"] : [])];
-      const results = await Promise.all(
-        cats.map(c =>
-          axios.get(`${import.meta.env.VITE_API_URL}/prep/questions?category=${c}&role=${encodeURIComponent(role)}&level=${level}`, opts)
-            .then(r => ({ cat: c, questions: r.data.questions || [] }))
-            .catch(() => ({ cat: c, questions: [] }))
-        )
-      );
-      const data = {};
-      results.forEach(r => { data[r.cat] = r.questions; });
+      const results = [];
+
+for (const c of cats) {
+  const res = await Promise.all([
+    axios.get(
+      `${import.meta.env.VITE_API_URL}/prep/questions?category=${c}&role=${encodeURIComponent(role)}&level=${level}`,
+      opts
+    )
+      .then(r => ({ cat: c, questions: r.data.questions || [] }))
+      .catch(err => {
+        console.error(`Error in ${c}:`, err);
+        return { cat: c, questions: [] };
+      })
+  ]);
+
+  results.push(res[0]);
+}
+
+const data = {};
+results.forEach(r => { data[r.cat] = r.questions; });
       setAllData(data);
       setActiveTab("technical");
     } catch { message.error("Failed to generate questions"); }
@@ -42,7 +53,7 @@ const PrepLibrary = () => {
 
   const tabs = [
     { key: "technical", label: "⚡ Technical" },
-    { key: "hr",        label: "🤝 HR & Behavioral" },
+    { key: "hr", label: "🤝 HR & Behavioral" },
     ...(showDsa ? [{ key: "dsa", label: "🧮 DSA" }] : []),
   ];
 
