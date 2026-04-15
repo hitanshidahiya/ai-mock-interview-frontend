@@ -4,6 +4,18 @@ import { message, Tooltip, Modal } from "antd";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, Bar, BarChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RTooltip, Cell } from "recharts";
 import axios from "axios";
 
+/* ── Date helpers (FIXED: these were missing before!) ── */
+const formatDateKey = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+const parseLocalDate = (str) => {
+  const [y, m, d] = str.slice(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 /* ── Circular Gauge ── */
 const Gauge = ({ value, max, label, color }) => {
   const pct = Math.min(100, Math.round((value / max) * 100));
@@ -22,134 +34,158 @@ const Gauge = ({ value, max, label, color }) => {
   );
 };
 
-/* ── Calendar heatmap ── */
+/* ── LeetCode-style Calendar Heatmap ── */
 const CalendarHeatmap = ({ activity, streak }) => {
   const actMap = {};
-  activity.forEach((a) => {
+  (activity || []).forEach((a) => {
     const key = formatDateKey(parseLocalDate(a.date));
     actMap[key] = a.count;
   });
 
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const DAY_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const start = new Date(today);
   start.setFullYear(start.getFullYear() - 1);
   start.setDate(start.getDate() + 1);
 
-  // Align to Sunday
+  // Align start to Sunday
   const startSunday = new Date(start);
   startSunday.setDate(startSunday.getDate() - startSunday.getDay());
 
+  // Build all days
   const allDays = [];
   for (let d = new Date(startSunday); d <= today; d.setDate(d.getDate() + 1)) {
+    const copy = new Date(d);
     allDays.push({
-      key: formatDateKey(new Date(d)),
-      date: new Date(d),
-      count: actMap[formatDateKey(new Date(d))] || 0,
+      key: formatDateKey(copy),
+      date: copy,
+      count: actMap[formatDateKey(copy)] || 0,
+      inRange: copy >= start && copy <= today,
     });
   }
 
-  const allWeeks = [];
-  for (let i = 0; i < allDays.length; i += 7) allWeeks.push(allDays.slice(i, i + 7));
+  // Chunk into weeks (columns)
+  const weeks = [];
+  for (let i = 0; i < allDays.length; i += 7) weeks.push(allDays.slice(i, i + 7));
 
-  // Group weeks by month
-  const byMonth = {};
-  allWeeks.forEach((week, wi) => {
-    const visibleDay = week.find(d => d.date >= start);
-    if (!visibleDay) return;
-    const mon = visibleDay.date.getMonth();
-    const yr = visibleDay.date.getFullYear();
-    const key = `${yr}-${mon}`;
-    if (!byMonth[key]) byMonth[key] = { month: mon, year: yr, weeks: [], firstWi: wi };
-    byMonth[key].weeks.push(week);
+  // Group weeks into months for LeetCode-style month labels
+  const monthLabels = []; // { label, colIndex }
+  let lastMonth = -1;
+  weeks.forEach((week, wi) => {
+    const firstInRange = week.find(d => d.inRange);
+    if (!firstInRange) return;
+    const m = firstInRange.date.getMonth();
+    if (m !== lastMonth) {
+      monthLabels.push({ label: MONTHS[m], col: wi });
+      lastMonth = m;
+    }
   });
 
-  const monthGroups = Object.values(byMonth).sort((a, b) => a.firstWi - b.firstWi);
-
   const cellColor = (n) => {
-    if (n === 0) return 'hcell-0';
-    if (n === 1) return 'hcell-1';
-    if (n === 2) return 'hcell-2';
-    if (n === 3) return 'hcell-3';
-    return 'hcell-4';
+    if (n === 0) return "hcell-0";
+    if (n === 1) return "hcell-1";
+    if (n === 2) return "hcell-2";
+    if (n === 3) return "hcell-3";
+    return "hcell-4";
   };
+
+  const CELL = 13; // cell size px
+  const GAP = 3;   // gap between cells px
+  const COL_W = CELL + GAP; // 16px per column
+  const DAY_LABEL_W = 28;
+  const totalW = DAY_LABEL_W + weeks.length * COL_W;
 
   return (
     <div className="heatmap-card">
       <div className="heatmap-scroll">
-        <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+        <div style={{ width: totalW, minWidth: totalW }}>
 
-          {/* Month labels row */}
-          <div style={{ display: 'flex', gap: 6, paddingLeft: 28, marginBottom: 4 }}>
-            {monthGroups.map((mg, i) => {
-              const totalWeeks = mg.weeks.length;
-              const width = totalWeeks * 13 + (totalWeeks - 1) * 3;
-              return (
-                <div key={i} style={{ width, fontSize: 11, color: 'var(--muted2)', flexShrink: 0 }}>
-                  {MONTHS[mg.month]}
-                </div>
-              );
-            })}
+          {/* Month labels */}
+          <div style={{ position: "relative", height: 18, marginLeft: DAY_LABEL_W }}>
+            {monthLabels.map((ml, i) => (
+              <span
+                key={i}
+                style={{
+                  position: "absolute",
+                  left: ml.col * COL_W,
+                  fontSize: 11,
+                  color: "var(--muted2)",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  lineHeight: "18px",
+                }}
+              >
+                {ml.label}
+              </span>
+            ))}
           </div>
 
-          {/* Body: day labels + month groups */}
-          <div style={{ display: 'flex', gap: 0 }}>
-
+          {/* Grid body */}
+          <div style={{ display: "flex", gap: 0 }}>
             {/* Day labels */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginRight: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", width: DAY_LABEL_W, flexShrink: 0, paddingTop: 1 }}>
               {DAY_LABELS.map((lb, i) => (
-                <div key={i} style={{ height: 13, fontSize: 11, color: 'var(--muted2)', lineHeight: '13px', textAlign: 'right', minWidth: 22 }}>
+                <div
+                  key={i}
+                  style={{
+                    height: CELL,
+                    marginBottom: i < 6 ? GAP : 0,
+                    fontSize: 10,
+                    color: "var(--muted2)",
+                    lineHeight: `${CELL}px`,
+                    textAlign: "right",
+                    paddingRight: 6,
+                    visibility: i % 2 === 1 ? "visible" : "hidden",
+                  }}
+                >
                   {lb}
                 </div>
               ))}
             </div>
 
-            {/* Month groups with gap between them */}
-            <div style={{ display: 'flex', gap: 6 }}>
-              {monthGroups.map((mg, mi) => (
-                <div key={mi} style={{ display: 'flex', gap: 3 }}>
-                  {mg.weeks.map((week, wi) => (
-                    <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                      {week.map((day) => {
-                        const isFuture = day.date > today;
-                        const isBeforeStart = day.date < start;
-                        return (
-                          <Tooltip
-                            key={day.key}
-                            title={`${day.key}: ${day.count} interview${day.count !== 1 ? 's' : ''}`}
-                          >
-                            <div
-                              className={`hcell ${isFuture || isBeforeStart ? 'hcell-hidden' : cellColor(day.count)}`}
-                            />
-                          </Tooltip>
-                        );
-                      })}
-                    </div>
+            {/* Weeks */}
+            <div style={{ display: "flex", gap: GAP }}>
+              {weeks.map((week, wi) => (
+                <div key={wi} style={{ display: "flex", flexDirection: "column", gap: GAP }}>
+                  {week.map((day, di) => (
+                    <Tooltip
+                      key={di}
+                      title={
+                        day.inRange
+                          ? `${day.key}: ${day.count} interview${day.count !== 1 ? "s" : ""}`
+                          : undefined
+                      }
+                    >
+                      <div
+                        className={`hcell ${!day.inRange ? "hcell-hidden" : cellColor(day.count)}`}
+                        style={{ width: CELL, height: CELL, flexShrink: 0 }}
+                      />
+                    </Tooltip>
                   ))}
                 </div>
               ))}
             </div>
+          </div>
 
+          {/* Legend */}
+          <div className="heatmap-legend" style={{ marginTop: 10 }}>
+            <span>Less</span>
+            {["hcell-0","hcell-1","hcell-2","hcell-3","hcell-4"].map((c) => (
+              <div key={c} className={`hcell ${c}`} style={{ width: CELL, height: CELL }} />
+            ))}
+            <span>More</span>
+            <span className="heatmap-legend-streak">{streak} day streak 🔥</span>
           </div>
         </div>
-      </div>
-
-      <div className="heatmap-legend">
-        <span>Less</span>
-        {['hcell-0','hcell-1','hcell-2','hcell-3','hcell-4'].map((c) => (
-          <div key={c} className={`hcell ${c}`} />
-        ))}
-        <span>More</span>
-        <span className="heatmap-legend-streak">{streak} day streak 🔥</span>
       </div>
     </div>
   );
 };
 
-/* ── Scores ── */
-const scoreColor = s => s >= 8 ? "#10b981" : s >= 5 ? "#f59e0b" : "#ef4444";
+/* ── Score color ── */
+const scoreColor = (s) => s >= 8 ? "#10b981" : s >= 5 ? "#f59e0b" : "#ef4444";
 
 const Dashboard = ({ setAuth }) => {
   const [data, setData] = useState(null);
@@ -245,7 +281,7 @@ const Dashboard = ({ setAuth }) => {
     <div className="page" style={{ background: "var(--bg)" }}>
       <div className="container" style={{ paddingTop: 88, paddingBottom: 60 }}>
 
-        {/* ── HEADER ROW ── */}
+        {/* HEADER ROW */}
         <div className="db-header-grid">
           <div>
             <p style={{ fontSize: 13, color: "var(--muted2)", marginBottom: 4 }}>Welcome back,</p>
@@ -290,12 +326,12 @@ const Dashboard = ({ setAuth }) => {
                 </div>
               </div>
             )}
-            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>📅 Activity — Last 70 Days</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>📅 Activity — Last Year</div>
             <CalendarHeatmap activity={activity} streak={streak?.streak || 0} />
           </div>
         </div>
 
-        {/* ── STAT CARDS ── */}
+        {/* STAT CARDS */}
         <div className="db-stat-grid">
           {[
             { label: "Interviews", val: data?.totalInterviews || 0, icon: "📝", grad: "var(--grad)" },
@@ -306,13 +342,13 @@ const Dashboard = ({ setAuth }) => {
           ].map(s => (
             <div key={s.label} className="card db-stat-card">
               <div className="db-stat-icon">{s.icon}</div>
-              <div className="db-stat-val" >{s.val}</div>
+              <div className="db-stat-val">{s.val}</div>
               <div className="db-stat-label">{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* ── CHARTS ROW ── */}
+        {/* CHARTS ROW */}
         <div className="db-charts-grid">
           <div className="card card-p">
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>🕸 Skill Radar</div>
@@ -353,7 +389,7 @@ const Dashboard = ({ setAuth }) => {
           </div>
         </div>
 
-        {/* ── AI TIPS + ROLES ── */}
+        {/* AI TIPS + ROLES */}
         <div className="db-bottom-grid">
           <div className="card card-p">
             <div className="db-tips-header">
@@ -392,7 +428,7 @@ const Dashboard = ({ setAuth }) => {
           </div>
         </div>
 
-        {/* ── HISTORY ── */}
+        {/* HISTORY */}
         <div className="card card-p">
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>📋 Interview History</div>
           {history.length === 0 ? (
@@ -427,7 +463,7 @@ const Dashboard = ({ setAuth }) => {
         </div>
       </div>
 
-      {/* ── DETAIL MODAL ── */}
+      {/* DETAIL MODAL */}
       <Modal open={!!selected} onCancel={() => setSelected(null)} footer={null} width={820}
         title={<span>{selected?.role} — Results</span>}>
         {selected && (
