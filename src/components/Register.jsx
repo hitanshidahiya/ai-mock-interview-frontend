@@ -45,10 +45,10 @@ const Register = ({ setAuth }) => {
       {/* Left panel */}
       <div className="auth-left-panel">
         <div className="auth-left-content">
-          <Link to="/" className="auth-brand">
+          {/* <Link to="/" className="auth-brand">
             <div className="auth-brand-icon">⚡</div>
             <span className="auth-brand-name">MockAI</span>
-          </Link>
+          </Link> */}
           <div className="auth-left-tagline">
             <h2 className="auth-left-heading">
               Start your<br />
