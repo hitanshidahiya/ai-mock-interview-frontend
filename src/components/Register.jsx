@@ -55,7 +55,7 @@ const Register = ({ setAuth }) => {
               <span className="g-text">journey today.</span>
             </h2>
             <p className="auth-left-sub">
-              Join thousands of candidates who prep smarter and land their dream roles.
+              Join MockAI today and transform the way you prepare—smarter, faster, and closer to your dream role.
             </p>
           </div>
           <div className="auth-left-features">
