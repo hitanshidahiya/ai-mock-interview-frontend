@@ -215,7 +215,7 @@ const Landing = () => {
 
       <div className="divider" />
       <div className="footer-bar">
-        <span style={{ color: "var(--muted)", fontSize: 13 }}>© 2025 MockAI · Built with MERN + Gemini AI</span>
+        <span style={{ color: "var(--muted)", fontSize: 13 }}>© 2026 MockAI · Built with MERN + Gemini AI</span>
       </div>
     </div>
   );
