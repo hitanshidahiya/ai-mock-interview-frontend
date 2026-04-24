@@ -6,7 +6,7 @@ const features = [
   { icon: "🎤", title: "Voice Mode",          desc: "Speak your answers aloud. Web Speech API transcribes and scores live.",        color: "#a855f7", bg: "rgba(168,85,247,0.1)" },
   { icon: "🧠", title: "Deep Analysis",       desc: "Filler word count, improved answers, strengths & areas to improve.",          color: "#f059b0", bg: "rgba(240,89,176,0.1)" },
   { icon: "📚", title: "Prep Library",        desc: "HR, Technical & DSA banks with AI ideal answers. Any role you choose.",       color: "#06b6d4", bg: "rgba(6,182,212,0.1)"  },
-  { icon: "📊", title: "Skill Analytics",     desc: "Radar charts, score trends, confidence gauges & 70-day streak heatmap.",      color: "#10b981", bg: "rgba(16,185,129,0.1)" },
+  { icon: "📊", title: "Skill Analytics",     desc: "Radar charts, score trends, confidence gauges & 90-day streak heatmap.",      color: "#10b981", bg: "rgba(16,185,129,0.1)" },
   { icon: "🔥", title: "Daily Streaks",       desc: "Daily challenges, streak tracking & AI coaching tips based on your data.",    color: "#f97316", bg: "rgba(249,115,22,0.1)" },
 ];
 
