@@ -54,7 +54,7 @@ const Landing = () => {
               </div>
 
               <div className="hero-stats anim-up-4">
-                {[["Any role", "Technical or non-technical"], ["3 modes", "Text, voice, code editor"], ["70 days", "Activity heatmap tracking"]].map(([v, l]) => (
+                {[["Any role", "Technical or non-technical"], ["3 modes", "Text, voice, code editor"], ["90 days", "Activity heatmap tracking"]].map(([v, l]) => (
                   <div key={l}>
                     <div className="hero-stat-val">{v}</div>
                     <div className="hero-stat-label">{l}</div>
