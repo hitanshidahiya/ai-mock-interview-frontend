@@ -89,7 +89,7 @@ const PrepLibrary = () => {
                   <span className="spin-indicator" />
                   Generating all…
                 </span>
-              ) : "Generate All ✦"}
+              ) : "Generate ✦"}
             </button>
           </div>
 
