@@ -129,7 +129,7 @@ const PrepLibrary = () => {
         {loading && (
           <div className="pl-loading">
             <div className="pl-spinner" />
-            <p style={{ color: "var(--text2)", fontSize: 15 }}>AI is generating all sections at once…</p>
+            <p style={{ color: "var(--text2)", fontSize: 15 }}>AI is generating, please wait ...</p>
           </div>
         )}
 
