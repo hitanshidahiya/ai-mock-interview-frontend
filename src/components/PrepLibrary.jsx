@@ -61,7 +61,7 @@ const PrepLibrary = () => {
           <h1 style={{ fontSize: "clamp(26px,4vw,40px)", fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 8 }}>
             Prep <span className="g-text">Library</span>
           </h1>
-          <p style={{ color: "var(--text2)", fontSize: 15 }}>Enter any role, click Generate once — we'll load Technical, HR & DSA (if tech) all at once.</p>
+          <p style={{ color: "var(--text2)", fontSize: 15 }}>Enter a role and click Generate — we’ll fetch each section step by step (Technical, HR, and DSA for tech roles).</p>
         </div>
 
         {/* Controls */}
@@ -87,7 +87,7 @@ const PrepLibrary = () => {
               {loading ? (
                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span className="spin-indicator" />
-                  Generating all…
+                  Generating …
                 </span>
               ) : "Generate ✦"}
             </button>
@@ -138,7 +138,7 @@ const PrepLibrary = () => {
           <div className="card card-p-lg" style={{ textAlign: "center", borderRadius: 20 }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🎯</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Enter any role and click Generate</div>
-            <p style={{ color: "var(--text2)", fontSize: 14 }}>Works for any job — technical or non-technical. All sections generate at once.</p>
+            <p style={{ color: "var(--text2)", fontSize: 14 }}>Works for any job — technical or non-technical. Sections load one by one.</p>
           </div>
         )}
 
